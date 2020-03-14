@@ -1,0 +1,53 @@
+version: 2
+jobs:
+  python37:
+    docker:
+      - image: python:3.7.5-stretch
+    working_directory: ~/code
+    steps:
+      - type: checkout
+
+      - type: cache-restore
+        key: {{ project_name }}-pip-cache-{{ checksum "requirements.txt" }}-python37
+
+      - type: shell
+        shell: /bin/bash
+        command: |
+          pip install -r requirements.txt
+
+      - type: cache-save
+        key: {{ project_name }}-pip-cache-{{ checksum "requirements.txt" }}-python37
+        paths:
+          - "/usr/local/lib/python3.7/dist-packages"
+          - "/usr/local/lib/python3.7/site-packages"
+
+      - type: shell
+        shell: /bin/bash
+        command: |
+          set -exu
+          python3 -m nose --with-coverage --cover-xml --cover-package=. --cover-inclusive --cover-branches --xunit-file=nosetests.xml {{ project_name }}/tests/
+          python3 -m codecov --file coverage.xml
+        environment:
+          PYTHONPATH: .
+
+  black:
+    docker:
+      - image: python:3.7.5-stretch
+    working_directory: ~/code
+    steps:
+      - type: checkout
+
+      - type: shell
+        command: pip3 install black
+
+      - type: shell
+        shell: /bin/bash
+        command: black --check {{ project_name }}/
+
+
+workflows:
+  version: 2
+  test_deploy:
+    jobs:
+      - python37
+      - black
