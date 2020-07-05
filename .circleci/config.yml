@@ -8,7 +8,7 @@ jobs:
       - type: checkout
 
       - type: cache-restore
-        key: {{ project_name }}-pip-cache-{{ checksum "requirements.txt" }}-python37
+        key: slackbuilder-pip-cache-{{ checksum "requirements.txt" }}-python37
 
       - type: shell
         shell: /bin/bash
@@ -16,7 +16,7 @@ jobs:
           pip install -r requirements.txt
 
       - type: cache-save
-        key: {{ project_name }}-pip-cache-{{ checksum "requirements.txt" }}-python37
+        key: slackbuilder-pip-cache-{{ checksum "requirements.txt" }}-python37
         paths:
           - "/usr/local/lib/python3.7/dist-packages"
           - "/usr/local/lib/python3.7/site-packages"
@@ -25,7 +25,7 @@ jobs:
         shell: /bin/bash
         command: |
           set -exu
-          python3 -m nose --with-coverage --cover-xml --cover-package=. --cover-inclusive --cover-branches --xunit-file=nosetests.xml {{ project_name }}/tests/
+          python3 -m nose --with-coverage --cover-xml --cover-package=. --cover-inclusive --cover-branches --xunit-file=nosetests.xml slackbuilder/tests/
           python3 -m codecov --file coverage.xml
         environment:
           PYTHONPATH: .
@@ -42,7 +42,7 @@ jobs:
 
       - type: shell
         shell: /bin/bash
-        command: black --check {{ project_name }}/
+        command: black --check slackbuilder/
 
 
 workflows:
